@@ -7,6 +7,20 @@ struct BankrollData: Identifiable {
     let amount: Double
 }
 
+enum RecommendationType {
+    case goodOpportunity
+    case betSmaller
+    case skipMatch
+}
+
+struct Recommendation: Identifiable {
+    let id = UUID()
+    let type: RecommendationType
+    let title: String
+    let description: String
+    let iconName: String
+}
+
 struct BankRollManagerView: View {
     @StateObject var bankRollManagerModel =  BankRollManagerViewModel()
     

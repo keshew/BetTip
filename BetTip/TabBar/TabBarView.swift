@@ -10,7 +10,7 @@ struct TabBarView: View {
                 if selectedTab == .Home {
                     HomeView()
                 } else if selectedTab == .Predictions {
-                    
+                    PredictionView()
                 } else if selectedTab == .History {
                     HistoryView()
                 } else if selectedTab == .Bankroll {

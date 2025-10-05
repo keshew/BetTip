@@ -17,6 +17,7 @@ struct HomePredictionModel: Identifiable, Codable {
 
 struct HomeView: View {
     @StateObject var homeModel =  HomeViewModel()
+    @State var isDetail = false
     let modelPrediction = [HomePredictionModel(nameLeague: "Premier League",
                                                imageLeague: "premierLeague",
                                                dateTime: "Today, 15:30",
@@ -166,26 +167,31 @@ struct HomeView: View {
                                                     .frame(height: 108)
                                                     .cornerRadius(12)
                                                 
-                                                Rectangle()
-                                                    .fill(LinearGradient(colors: [Color(red: 59/255, green: 130/255, blue: 246/255),
-                                                                                  Color(red: 38/255, green: 99/255, blue: 235/255)], startPoint: .leading, endPoint: .trailing))
-                                                    .overlay {
-                                                        HStack {
-                                                            Text("View Details")
-                                                                .FontRegular(size: 16)
-                                                            
-                                                            Image(systemName: "arrow.right")
-                                                                .foregroundStyle(.white)
+                                                Button(action: {
+                                                    isDetail = true
+                                                }) {
+                                                    Rectangle()
+                                                        .fill(LinearGradient(colors: [Color(red: 59/255, green: 130/255, blue: 246/255),
+                                                                                      Color(red: 38/255, green: 99/255, blue: 235/255)], startPoint: .leading, endPoint: .trailing))
+                                                        .overlay {
+                                                            HStack {
+                                                                Text("View Details")
+                                                                    .FontRegular(size: 16)
+                                                                
+                                                                Image(systemName: "arrow.right")
+                                                                    .foregroundStyle(.white)
+                                                            }
                                                         }
-                                                    }
-                                                    .frame(height: 44)
-                                                    .cornerRadius(12)
+                                                        .frame(height: 44)
+                                                        .cornerRadius(12)
+                                                }
                                             }
                                             .padding(.horizontal)
                                         }
                                 }
-                                .frame(width: 343, height: 282)
+                                .frame(height: 282)
                                 .cornerRadius(16)
+                                .padding(.horizontal)
                         }
                         
                         Color.clear.frame(height: 60)
@@ -194,6 +200,9 @@ struct HomeView: View {
                 .padding(.top)
             }
             .padding(.top)
+        }
+        .fullScreenCover(isPresented: $isDetail) {
+            DetailsView()
         }
     }
 }
