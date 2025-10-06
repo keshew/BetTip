@@ -13,11 +13,26 @@ struct HomePredictionModel: Identifiable, Codable {
     var betText: String
     var coofiecient: String
     var confidence: String
+    var isWon: Bool? = nil
+    var date = Date()
+    var bet = ""
 }
 
 struct HomeView: View {
     @StateObject var homeModel =  HomeViewModel()
     @State var isDetail = false
+    @State var selectedModel: HomePredictionModel = HomePredictionModel(nameLeague: "Premier League",
+                                                    imageLeague: "premierLeague",
+                                                    dateTime: "Today, 15:30",
+                                                    firstTeamName: "Man United",
+                                                    firstTeamImage: "manUn",
+                                                    secondTeamName: "Liverpool",
+                                                    secondTeamImage: "liverpool",
+                                                    aiPrediction: "67%",
+                                                    betText: "Liverpool Win",
+                                                    coofiecient: "2.45",
+                                                    confidence: "High confidence")
+    
     let modelPrediction = [HomePredictionModel(nameLeague: "Premier League",
                                                imageLeague: "premierLeague",
                                                dateTime: "Today, 15:30",
@@ -168,6 +183,7 @@ struct HomeView: View {
                                                     .cornerRadius(12)
                                                 
                                                 Button(action: {
+                                                    selectedModel = item
                                                     isDetail = true
                                                 }) {
                                                     Rectangle()
@@ -202,7 +218,7 @@ struct HomeView: View {
             .padding(.top)
         }
         .fullScreenCover(isPresented: $isDetail) {
-            DetailsView()
+            DetailsView(model: $selectedModel)
         }
     }
 }

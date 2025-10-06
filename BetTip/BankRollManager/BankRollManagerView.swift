@@ -1,20 +1,20 @@
 import SwiftUI
 import Charts
 
-struct BankrollData: Identifiable {
-    let id = UUID()
-    let week: String
-    let amount: Double
+struct BankrollData: Identifiable, Codable {
+    var id = UUID().uuidString
+    var week: String
+    var amount: Double
 }
 
-enum RecommendationType {
+enum RecommendationType: Codable {
     case goodOpportunity
     case betSmaller
     case skipMatch
 }
 
-struct Recommendation: Identifiable {
-    let id = UUID()
+struct Recommendation: Identifiable, Codable {
+    var id = UUID().uuidString
     let type: RecommendationType
     let title: String
     let description: String
@@ -23,13 +23,76 @@ struct Recommendation: Identifiable {
 
 struct BankRollManagerView: View {
     @StateObject var bankRollManagerModel =  BankRollManagerViewModel()
+    let userManager = UserDefaultsManager.shared
     
-    let bankrollPoints = [
-        BankrollData(week: "Week 1", amount: 2500),
-        BankrollData(week: "Week 2", amount: 2600),
-        BankrollData(week: "Week 3", amount: 2800),
-        BankrollData(week: "Week 4", amount: 2900)
+    let displayedRecommendations: [Recommendation] = [
+        Recommendation(type: .goodOpportunity,
+                       title: "Good Opportunity",
+                       description: "Liverpool vs Arsenal match shows strong value. Consider a balanced bet size.",
+                       iconName: "checkmarkImg2"),
+        Recommendation(type: .betSmaller,
+                       title: "Bet Smaller",
+                       description: "You've had 3 losses in a row. Consider reducing bet size by 25%.",
+                       iconName: "warningImg"),
+        Recommendation(type: .skipMatch,
+                       title: "Skip This Match",
+                       description: "High uncertainty in Chelsea vs Man City. Wait for better opportunities.",
+                       iconName: "skip"),
+
+        Recommendation(type: .goodOpportunity,
+                       title: "Strong Odds",
+                       description: "Real Madrid vs Barcelona offers attractive odds. Consider increasing your stake.",
+                       iconName: "checkmarkImg2"),
+        Recommendation(type: .betSmaller,
+                       title: "Cautious Bet",
+                       description: "Recent losses recommend smaller bets on this game to minimize risks.",
+                       iconName: "warningImg"),
+        Recommendation(type: .skipMatch,
+                       title: "Hold Off",
+                       description: "Unpredictable factors in Lakers vs Warriors. Better to skip this match.",
+                       iconName: "skip"),
+
+        Recommendation(type: .goodOpportunity,
+                       title: "Value Bet",
+                       description: "Man City vs Liverpool is a good chance for a profitable bet.",
+                       iconName: "checkmarkImg2"),
+        Recommendation(type: .betSmaller,
+                       title: "Lower Your Stake",
+                       description: "Consider lowering your bet size due to recent instability in outcomes.",
+                       iconName: "warningImg"),
+        Recommendation(type: .skipMatch,
+                       title: "Skip Encounter",
+                       description: "Too much uncertainty in the match. Wait for clearer signals.",
+                       iconName: "skip"),
+
+        Recommendation(type: .goodOpportunity,
+                       title: "Smart Bet",
+                       description: "Tottenham vs Everton shows promising statistics for a winning bet.",
+                       iconName: "checkmarkImg2"),
+        Recommendation(type: .betSmaller,
+                       title: "Reduce Bet",
+                       description: "Advised to reduce bet size after recent losing streak.",
+                       iconName: "warningImg"),
+        Recommendation(type: .skipMatch,
+                       title: "Avoid Match",
+                       description: "Consider avoiding this match due to unpredictable performance.",
+                       iconName: "skip"),
+
+        Recommendation(type: .goodOpportunity,
+                       title: "High Confidence",
+                       description: "Brighton vs Chelsea: strong statistical indicators support a bet.",
+                       iconName: "checkmarkImg2"),
+        Recommendation(type: .betSmaller,
+                       title: "Small Wagers",
+                       description: "Reduce your wager due to recent team inconsistencies.",
+                       iconName: "warningImg"),
+        Recommendation(type: .skipMatch,
+                       title: "Pass This Game",
+                       description: "Better to wait and skip the game due to unclear outcomes.",
+                       iconName: "skip"),
     ]
+
+    let bankrollPoints = UserDefaultsManager.shared.bankrollPoints
     
     var body: some View {
         ZStack {
@@ -64,18 +127,13 @@ struct BankRollManagerView: View {
                                             Text("Current Bankroll")
                                                 .FontRegular(size: 16)
                                             
-                                            Text("$2,847.50")
+                                            Text("$\(String(format: "%.2f", userManager.balance))")
                                                 .FontRegular(size: 36)
-                                            
-                                            HStack {
-                                                Image(systemName: "arrow.up")
-                                                    .foregroundStyle(Color(red: 74/255, green: 222/255, blue: 129/255))
-                                                
-                                                Text("+12.3% (+$315.20)")
-                                                    .FontRegular(size: 16, color: Color(red: 74/255, green: 222/255, blue: 129/255))
-                                                
-                                                Text("this month")
-                                                    .FontRegular(size: 14, color: Color(red: 148/255, green: 163/255, blue: 185/255))
+
+                                            if let change = userManager.balanceChangeSinceMonthStart() {
+                                                BalanceChangeView(percentChange: change.percentChange, amountChange: change.amountChange)
+                                            } else {
+                                                BalanceChangeView(percentChange: 0, amountChange: 0)
                                             }
                                             
                                             HStack {
@@ -84,18 +142,23 @@ struct BankRollManagerView: View {
                                                     Text("Available")
                                                         .FontRegular(size: 12, color: Color(red: 148/255, green: 163/255, blue: 185/255))
                                                     
-                                                    Text("$2,200.00")
+                                                    Text("\(userManager.balance)")
                                                         .FontRegular(size: 16)
                                                 }
                                                 
                                                 Spacer()
                                                 
                                                 VStack {
-                                                    Text("In Play")
+                                                    Text("Losed")
                                                         .FontRegular(size: 12, color: Color(red: 148/255, green: 163/255, blue: 185/255))
                                                     
-                                                    Text("$647.50")
-                                                        .FontRegular(size: 16, color: Color(red: 250/255, green: 204/255, blue: 23/255))
+                                                    if let change = userManager.balanceChangeSinceMonthStart() {
+                                                        Text("\(String(format: "%.2f", change.amountChange))$")
+                                                            .FontRegular(size: 16, color: Color(red: 250/255, green: 204/255, blue: 23/255))
+                                                    } else {
+                                                        Text("$0")
+                                                            .FontRegular(size: 16, color: Color(red: 250/255, green: 204/255, blue: 23/255))
+                                                    }
                                                 }
                                                 
                                                 Spacer()
@@ -104,7 +167,7 @@ struct BankRollManagerView: View {
                                                     Text("Reserved")
                                                         .FontRegular(size: 12, color: Color(red: 148/255, green: 163/255, blue: 185/255))
                                                     
-                                                    Text("$2,200.00")
+                                                    Text("\(userManager.balance)")
                                                         .FontRegular(size: 16, color: Color(red: 96/255, green: 165/255, blue: 250/255))
                                                 }
                                                 
@@ -138,6 +201,7 @@ struct BankRollManagerView: View {
                                             Button(action: {
                                                 if !bankRollManagerModel.isOn {
                                                     bankRollManagerModel.typeBet = .conservative
+                                                    userManager.updateStrategy(to: .conservative)
                                                 }
                                             }) {
                                                 Rectangle()
@@ -175,6 +239,7 @@ struct BankRollManagerView: View {
                                             Button(action: {
                                                 if !bankRollManagerModel.isOn {
                                                     bankRollManagerModel.typeBet = .balanced
+                                                    userManager.updateStrategy(to: .balanced)
                                                 }
                                             }) {
                                                 Rectangle()
@@ -212,6 +277,7 @@ struct BankRollManagerView: View {
                                             Button(action: {
                                                 if !bankRollManagerModel.isOn {
                                                     bankRollManagerModel.typeBet = .agressive
+                                                    userManager.updateStrategy(to: .aggressive)
                                                 }
                                             }) {
                                                 Rectangle()
@@ -340,87 +406,15 @@ struct BankRollManagerView: View {
                                                 
                                                 Spacer()
                                             }
-                                            
-                                            Rectangle()
-                                                .fill(Color(red: 21/255, green: 83/255, blue: 45/255).opacity(0.5))
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 14)
-                                                        .stroke(Color(red: 22/255, green: 128/255, blue: 61/255))
-                                                        .overlay {
-                                                            VStack(alignment: .leading) {
-                                                                HStack {
-                                                                    Image(.checkmarkImg2)
-                                                                        .resizable()
-                                                                        .frame(width: 16, height: 24)
-                                                                    
-                                                                    Text("Good Opportunity")
-                                                                        .FontRegular(size: 14, color: Color(red: 74/255, green: 222/255, blue: 129/255))
-                                                                    
-                                                                    Spacer()
-                                                                }
-                                                                
-                                                                Text("Liverpool vs Arsenal match shows strong value. Consider a balanced bet size.")
-                                                                    .FontRegular(size: 14)
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
+
+                                            VStack(spacing: 15) {
+                                                let displayedRecommendations = Array(displayedRecommendations.shuffled().prefix(3))
+
+                                                ForEach(displayedRecommendations) { recommendation in
+                                                    RecommendationView(recommendation: recommendation)
                                                 }
-                                                .frame(height: 98)
-                                                .cornerRadius(14)
-                                            
-                                            Rectangle()
-                                                .fill(Color(red: 113/255, green: 63/255, blue: 17/255).opacity(0.5))
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 14)
-                                                        .stroke(Color(red: 162/255, green: 98/255, blue: 8/255))
-                                                        .overlay {
-                                                            VStack(alignment: .leading) {
-                                                                HStack {
-                                                                    Image(.warningImg)
-                                                                        .resizable()
-                                                                        .frame(width: 16, height: 24)
-                                                                    
-                                                                    Text("Bet Smaller")
-                                                                        .FontRegular(size: 14, color: Color(red: 250/255, green: 204/255, blue: 23/255))
-                                                                    
-                                                                    Spacer()
-                                                                }
-                                                                
-                                                                Text("You've had 3 losses in a row. Consider reducing bet size by 25%.")
-                                                                    .FontRegular(size: 14, color: Color(red: 255/255, green: 249/255, blue: 195/255))
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
-                                                }
-                                                .frame(height: 98)
-                                                .cornerRadius(14)
-                                            
-                                            Rectangle()
-                                                .fill(Color(red: 126/255, green: 29/255, blue: 30/255).opacity(0.5))
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 14)
-                                                        .stroke(Color(red: 185/255, green: 27/255, blue: 28/255))
-                                                        .overlay {
-                                                            VStack(alignment: .leading) {
-                                                                HStack {
-                                                                    Image(.skip)
-                                                                        .resizable()
-                                                                        .frame(width: 16, height: 24)
-                                                                    
-                                                                    Text("Skip This Match")
-                                                                        .FontRegular(size: 14, color: Color(red: 248/255, green: 113/255, blue: 113/255))
-                                                                    
-                                                                    Spacer()
-                                                                }
-                                                                
-                                                                Text("High uncertainty in Chelsea vs Man City. Wait for better opportunities.")
-                                                                    .FontRegular(size: 14, color: Color(red: 254/255, green: 225/255, blue: 226/255))
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
-                                                }
-                                                .frame(height: 98)
-                                                .cornerRadius(14)
+                                            }
+                                            .cornerRadius(14)
                                         }
                                         .padding(.horizontal)
                                     }
@@ -441,26 +435,4 @@ struct BankRollManagerView: View {
 
 #Preview {
     BankRollManagerView()
-}
-
-struct CustomToggleStyle2: ToggleStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack {
-            configuration.label
-            Spacer()
-            RoundedRectangle(cornerRadius: 16)
-                .fill(configuration.isOn ? Color(red: 15/255, green: 23/255, blue: 42/255) : Color(red: 51/255, green: 65/255, blue: 84/255))
-                .frame(width: 48, height: 24)
-                .overlay(
-                    Circle()
-                        .fill(configuration.isOn ? Color.white : Color(red: 59/255, green: 130/255, blue: 246/255))
-                        .frame(width: 16, height: 16)
-                        .offset(x: configuration.isOn ? 12 : -12)
-                        .animation(.easeInOut, value: configuration.isOn)
-                )
-                .onTapGesture {
-                    configuration.isOn.toggle()
-                }
-        }
-    }
 }

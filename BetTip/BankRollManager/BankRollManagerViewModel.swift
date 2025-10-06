@@ -12,6 +12,7 @@ class BankRollManagerViewModel: ObservableObject {
     @Published var isOn: Bool {
         didSet {
             self.typeBet = .balanced
+            UserDefaultsManager.shared.updateStrategy(to: .balanced)
             UserDefaults.standard.set(isOn, forKey: "isBetOn")
         }
     }

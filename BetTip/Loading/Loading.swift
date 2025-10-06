@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LoadingView: View {
+    @State var isTab = false
     var body: some View {
         ZStack {
             Color(red: 30/255, green: 39/255, blue: 57/255).ignoresSafeArea()
@@ -21,7 +22,7 @@ struct LoadingView: View {
                     }
                     
                     Button(action: {
-                        
+                        isTab = true
                     }) {
                         Image(.getStartedImg)
                             .resizable()
@@ -30,6 +31,9 @@ struct LoadingView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $isTab) {
+            TabBarView()
         }
     }
 }

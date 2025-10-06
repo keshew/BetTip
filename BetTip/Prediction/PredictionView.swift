@@ -25,43 +25,11 @@ struct PredictionModelMatch: Identifiable {
     var category: BetCategory
 }
 
-
 struct PredictionView: View {
     @StateObject var predictionModel =  PredictionViewModel()
     @State var selectedLiga: SelectedLiga? = .premier
     @State var betCategory = BetCategory.outcome
-    let modelMatch = [PredictionModelMatch(league: "Premier League",
-                                           teamAName: "Arsenal",
-                                           teamBName: "Chelsea",
-                                           time: "15:30",
-                                           confidence: 4,
-                                           prediction: "Arsenal Win",
-                                           coeficente: "2.10",
-                                           category: .outcome),
-                      PredictionModelMatch(league: "La Liga",
-                                           teamAName: "Real Madrid",
-                                           teamBName: "Barcelona",
-                                           time: "18:00",
-                                           confidence: 5,
-                                           prediction: "Over 2.5 Goals",
-                                           coeficente: "2.10",
-                                           category: .total),
-                      PredictionModelMatch(league: "NBA",
-                                           teamAName: "Lakers",
-                                           teamBName: "Warriors",
-                                           time: "21:30",
-                                           confidence: 3,
-                                           prediction: "Warriors +5.5",
-                                           coeficente: "1.95",
-                                           category: .handicaps),
-                      PredictionModelMatch(league: "Premier League",
-                                           teamAName: "Liverpool",
-                                           teamBName: "Man City",
-                                           time: "17:30",
-                                           confidence: 5,
-                                           prediction: "Both Teams Score",
-                                           coeficente: "1.65",
-                                           category: .bothTeam)]
+   
     
     func gradient(item: PredictionModelMatch) -> LinearGradient {
         if item.league == "Premier League" {
@@ -91,7 +59,7 @@ struct PredictionView: View {
     }
     
     var filteredMatches: [PredictionModelMatch] {
-        return modelMatch.filter { match in
+        return predictionModel.contact.modelMatch.filter { match in
             (selectedLiga == nil || match.league == leagueString(for: selectedLiga)) &&
             match.category == betCategory
         }
@@ -460,6 +428,8 @@ struct PredictionView: View {
                                     .padding(.horizontal)
                             }
                         }
+                        
+                        Color.clear.frame(height: 60)
                     }
                     .padding(.top)
                 }
